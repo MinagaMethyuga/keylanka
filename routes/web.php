@@ -133,10 +133,11 @@ Route::middleware(['auth'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
-
-    // Dashboard
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
+});
+
+Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
 
     // Product Management
     Route::get('/ManageProducts', [AdminDashboard::class, 'ManageKeyIndex'])->name('Manage.Products.index');
@@ -165,3 +166,4 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
 
 // Legacy route for adding products (backward compatibility)
 Route::post('/addProducts', [ProductsController::class, 'store'])->name('addProducts.store');
+
