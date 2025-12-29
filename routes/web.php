@@ -101,3 +101,14 @@ Route::middleware(['auth'])->group(function () {
 
 // Legacy route for adding products (keeping for backward compatibility if needed)
 Route::post('/addProducts', [App\Http\Controllers\ProductsController::class, 'store'])->name('addProducts.store');
+
+
+// Profile/Settings routes
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Two-factor authentication
+    Route::get('/two-factor', [TwoFactorAuthenticationController::class, 'show'])->name('two-factor.show');
+});
