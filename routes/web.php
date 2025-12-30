@@ -101,3 +101,9 @@ Route::middleware(['auth'])->group(function () {
 
 // Legacy route for adding products (keeping for backward compatibility if needed)
 Route::post('/addProducts', [App\Http\Controllers\ProductsController::class, 'store'])->name('addProducts.store');
+
+
+Route::get('/clear-cache', function () {
+    Artisan::call('optimize:clear');
+    return 'Cache cleared';
+});
