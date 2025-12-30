@@ -1,89 +1,49 @@
 <?php
 
-use App\Http\Controllers\Admin\AdminDashboard;
-use App\Http\Controllers\Admin\OrderController;
-use App\Http\Controllers\EmailController;
-use App\Http\Controllers\FlipKeys;
-use App\Http\Controllers\KeyCovers;
-use App\Http\Controllers\KeyShells;
-use App\Http\Controllers\LocksmithTools;
-use App\Http\Controllers\Other;
-use App\Http\Controllers\PasswordController;
-use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\ProductsController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\RemoteKeys;
-use App\Http\Controllers\SmartKey;
-use App\Http\Controllers\TwoFactorAuthenticationController;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Laravel\Fortify\Features;
+use Livewire\Volt\Volt;
 
-/*
-|--------------------------------------------------------------------------
-| Public Routes
-|--------------------------------------------------------------------------
-*/
 
-// Home & About
+//public Views
 Route::get('/', function () {
     return view('home');
 })->name('home');
 
-Route::get('/AboutUs', function () {
-    return view('AboutUs');
-})->name('AboutUs');
+Route::get('/Confirmation', function () {
+    return view('ConfirmationPage');
+})->name('Confrimation');
 
-// Product Catalog Routes
-Route::prefix('LocksmithTools')->name('products.')->group(function () {
-    Route::get('/', [LocksmithTools::class, 'index'])->name('index');
-    Route::get('/KeyDiy', [LocksmithTools::class, 'KeyDIYIndex'])->name('KeyDiy');
-    Route::get('/xHorse', [LocksmithTools::class, 'xHorseIndex'])->name('xHorse');
-    Route::get('/Other', [LocksmithTools::class, 'OtherIndex'])->name('Other');
-});
+Route::get('/LocksmithTools', [App\Http\Controllers\LocksmithTools::class, 'index'])->name('products.index');
+Route::get('/LocksmithTools/KeyDiy', [App\Http\Controllers\LocksmithTools::class, 'KeyDIYIndex'])->name('products.KeyDiy');
+Route::get('/LocksmithTools/xHorse', [App\Http\Controllers\LocksmithTools::class, 'xHorseIndex'])->name('products.xHorse');
+Route::get('/LocksmithTools/Other', [App\Http\Controllers\LocksmithTools::class, 'OtherIndex'])->name('products.Other');
+Route::get('/FlipKeys', [App\Http\Controllers\FlipKeys::class, 'index'])->name('FlipKey.index');
+Route::get('/KeyShells', [App\Http\Controllers\KeyShells::class, 'index'])->name('KeyShells.index');
+Route::get('/RemoteKeys', [App\Http\Controllers\RemoteKeys::class, 'index'])->name('Remote.index');
+Route::get('/RemoteKeys/{brand}', [App\Http\Controllers\RemoteKeys::class, 'showByBrand'])->name('Remote.brand');
+Route::get('/SmartKeys', [App\Http\Controllers\SmartKey::class, 'index'])->name('Smart.index');
+Route::get('/SmartKeys/{brand}', [App\Http\Controllers\SmartKey::class, 'showByBrand'])->name('Smart.brand');
+Route::get('/KeyCovers', [App\Http\Controllers\KeyCovers::class, 'index'])->name('KeyCover.index');
+Route::get('/Other', [App\Http\Controllers\Other::class, 'index'])->name('Other.index');
 
-Route::get('/FlipKeys', [FlipKeys::class, 'index'])->name('FlipKey.index');
-Route::get('/KeyShells', [KeyShells::class, 'index'])->name('KeyShells.index');
-Route::get('/KeyCovers', [KeyCovers::class, 'index'])->name('KeyCover.index');
-Route::get('/Other', [Other::class, 'index'])->name('Other.index');
+Route::post('/verify-code', [\App\Http\Controllers\EmailController::class, 'verifyCode'])->name('verify.code');
+Route::post('/verify-email', [\App\Http\Controllers\EmailController::class, 'verifyEmail'])->name('verify.email');
+Route::get('/payment/return', [\App\Http\Controllers\PaymentController::class, 'paymentReturn'])->name('payment.return');
 
-Route::prefix('RemoteKeys')->name('Remote.')->group(function () {
-    Route::get('/', [RemoteKeys::class, 'index'])->name('index');
-    Route::get('/{brand}', [RemoteKeys::class, 'showByBrand'])->name('brand');
-});
+Route::post('/checkoutpay', [\App\Http\Controllers\PaymentController::class, 'preparePayment']);
+Route::post('/payhere-notify', [\App\Http\Controllers\PaymentController::class, 'PaymentNotify'])
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
-Route::prefix('SmartKeys')->name('Smart.')->group(function () {
-    Route::get('/', [SmartKey::class, 'index'])->name('index');
-    Route::get('/{brand}', [SmartKey::class, 'showByBrand'])->name('brand');
-});
-
-// Checkout & Payment Routes
-Route::get('/checkout', function () {
-    return view('CheckoutPage');
-})->name('checkout');
-
-Route::post('/checkoutpay', [PaymentController::class, 'preparePayment']);
-Route::get('/payment/return', [PaymentController::class, 'paymentReturn'])->name('payment.return');
 Route::get('/Confirmation', function () {
     return view('ConfirmationPage');
 })->name('payment.Confirmation');
 
-Route::post('/payhere-notify', [PaymentController::class, 'PaymentNotify'])
-    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+Route::get('/track-order', [\App\Http\Controllers\PaymentController::class, 'trackOrder'])->name('order.track');
 
-// Order Tracking
-Route::get('/track-order', [PaymentController::class, 'trackOrder'])->name('order.track');
-
-// Email Verification
-Route::post('/verify-code', [EmailController::class, 'verifyCode'])->name('verify.code');
-Route::post('/verify-email', [EmailController::class, 'verifyEmail'])->name('verify.email');
-
-/*
-|--------------------------------------------------------------------------
-| Authentication Routes
-|--------------------------------------------------------------------------
-| Laravel Fortify handles most auth routes automatically.
-| These are custom views/overrides.
-*/
+Route::get('/AboutUs', function () {
+    return view('AboutUs');
+})->name('AboutUs');
 
 Route::get('/register', function () {
     return view('livewire.auth.register');
@@ -93,6 +53,10 @@ Route::get('/login', function () {
     return view('livewire.auth.login');
 })->name('login');
 
+Route::get('/checkout', function () {
+    return view('CheckoutPage');
+})->name('checkout');
+
 Route::post('/logout', function () {
     Auth::logout();
     request()->session()->invalidate();
@@ -100,73 +64,40 @@ Route::post('/logout', function () {
     return redirect('/');
 })->middleware('auth')->name('logout');
 
-/*
-|--------------------------------------------------------------------------
-| Authenticated User Routes
-|--------------------------------------------------------------------------
-*/
 
+//Private views
 Route::middleware(['auth'])->group(function () {
 
-    // User Profile & Settings
-    Route::prefix('profile')->name('profile.')->group(function () {
-        Route::get('/', [ProfileController::class, 'edit'])->name('edit');
-        Route::patch('/', [ProfileController::class, 'update'])->name('update');
-        Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
-    });
+    Route::get('/dashboard', [\App\Http\Controllers\Admin\AdminDashboard::class, 'index'])
+        ->middleware(['auth', 'verified'])
+        ->name('dashboard');
 
-    // Password Management
-    Route::prefix('user')->group(function () {
-        Route::get('/password', [PasswordController::class, 'edit'])->name('user-password.edit');
-        Route::put('/password', [PasswordController::class, 'update'])->name('user-password.update');
+    Route::get('/ManageProducts', [\App\Http\Controllers\Admin\AdminDashboard::class, 'ManageKeyIndex'])->name('Manage.Products.index');
 
-        // Two-Factor Authentication
-        Route::get('/two-factor-authentication', [TwoFactorAuthenticationController::class, 'show'])
-            ->middleware(['password.confirm'])
-            ->name('two-factor.show');
-    });
-});
-
-/*
-|--------------------------------------------------------------------------
-| Admin Routes
-|--------------------------------------------------------------------------
-*/
-
-Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
-
-    // Dashboard
-    Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
-
-    // Product Management
-    Route::get('/ManageProducts', [AdminDashboard::class, 'ManageKeyIndex'])->name('Manage.Products.index');
     Route::get('/add-key', function () {
         return view('AddKeyAdmin');
     })->name('add-key');
 
-    // Product API Routes
-    Route::prefix('products')->name('admin.products.')->group(function () {
-        Route::get('/{id}', [ProductsController::class, 'getProduct'])->name('get');
-        Route::post('/', [ProductsController::class, 'store'])->name('store');
-        Route::put('/{id}', [ProductsController::class, 'update'])->name('update');
-        Route::delete('/{id}', [ProductsController::class, 'destroy'])->name('destroy');
-    });
+    // Order Management Routes
+    Route::get('/ManageOrders', [\App\Http\Controllers\Admin\OrderController::class, 'index'])->name('admin.order.manage');
+    Route::get('/orders/{orderId}', [\App\Http\Controllers\Admin\OrderController::class, 'show'])->name('admin.orders.show');
+    Route::post('/orders/{orderId}/status', [\App\Http\Controllers\Admin\OrderController::class, 'updateStatus'])->name('admin.orders.updateStatus');
 
-    // Order Management
-    Route::prefix('orders')->name('admin.orders.')->group(function () {
-        Route::get('/', [OrderController::class, 'index'])->name('manage');
-        Route::get('/{orderId}', [OrderController::class, 'show'])->name('show');
-        Route::post('/{orderId}/status', [OrderController::class, 'updateStatus'])->name('updateStatus');
-    });
+    // Product Management Routes
+    Route::prefix('admin')->group(function () {
+        // Get single product (for edit modal)
+        Route::get('/products/{id}', [App\Http\Controllers\ProductsController::class, 'getProduct'])->name('admin.products.get');
 
-    // Legacy route alias for order management
-    Route::get('/ManageOrders', [OrderController::class, 'index'])->name('admin.order.manage');
+        // Create product
+        Route::post('/products', [App\Http\Controllers\ProductsController::class, 'store'])->name('admin.products.store');
+
+        // Update product
+        Route::put('/products/{id}', [App\Http\Controllers\ProductsController::class, 'update'])->name('admin.products.update');
+
+        // Delete product
+        Route::delete('/products/{id}', [App\Http\Controllers\ProductsController::class, 'destroy'])->name('admin.products.destroy');
+    });
 });
 
-// Legacy route for adding products (backward compatibility)
-Route::post('/addProducts', [ProductsController::class, 'store'])->name('addProducts.store');
-
-Route::get('/settings/appearance', function () {
-    return view('settings.appearance');
-})->name('appearance.edit');
-
+// Legacy route for adding products (keeping for backward compatibility if needed)
+Route::post('/addProducts', [App\Http\Controllers\ProductsController::class, 'store'])->name('addProducts.store');
