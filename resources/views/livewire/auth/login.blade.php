@@ -87,12 +87,12 @@
                 </label>
                 <button class="flex h-12 w-full items-center justify-center rounded-lg bg-primary px-6 py-3 text-base font-bold text-white shadow-md transition-all hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background-light dark:focus:ring-offset-background-dark">Login</button>
             </form>
-            <div class="mt-8 text-center">
-                <p class="text-sm text-gray-600 dark:text-gray-400">
-                    Need an account?
-                    <a class="font-bold text-primary hover:underline" href="{{route('register')}}">Sign Up</a>
-                </p>
-            </div>
+{{--            <div class="mt-8 text-center">--}}
+{{--                <p class="text-sm text-gray-600 dark:text-gray-400">--}}
+{{--                    Need an account?--}}
+{{--                    <a class="font-bold text-primary hover:underline" href="{{route('register')}}">Sign Up</a>--}}
+{{--                </p>--}}
+{{--            </div>--}}
         </div>
     </main>
 </div>
