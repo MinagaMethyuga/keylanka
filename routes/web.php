@@ -7,7 +7,7 @@ use Livewire\Volt\Volt;
 
 //public Views
 Route::get('/', function () {
-    return view('home');
+    return view('Maintainance');
 })->name('home');
 
 Route::get('/Confirmation', function () {
@@ -45,7 +45,7 @@ Route::get('/AboutUs', function () {
     return view('AboutUs');
 })->name('AboutUs');
 
-Route::get('/register', function () {
+Route::get('/registryofdoom', function () {
     return view('livewire.auth.register');
 })->name('register');
 
