@@ -165,3 +165,8 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
 
 // Legacy route for adding products (backward compatibility)
 Route::post('/addProducts', [ProductsController::class, 'store'])->name('addProducts.store');
+
+Route::get('/settings/appearance', function () {
+    return view('settings.appearance');
+})->name('appearance.edit');
+
