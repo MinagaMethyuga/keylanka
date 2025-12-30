@@ -45,9 +45,9 @@ Route::get('/AboutUs', function () {
     return view('AboutUs');
 })->name('AboutUs');
 
-Route::get('/registryofdoom', function () {
-    return view('livewire.auth.register');
-})->name('register');
+//Route::get('/registryofdoom', function () {
+//    return view('livewire.auth.register');
+//})->name('register');
 
 Route::get('/login', function () {
     return view('livewire.auth.login');
