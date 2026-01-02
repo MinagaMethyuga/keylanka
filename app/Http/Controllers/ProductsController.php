@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 class ProductsController extends Controller
 {
@@ -33,8 +33,20 @@ class ProductsController extends Controller
             $product->category = $validated['category'] ?? null;
 
             if ($request->hasFile('image')) {
-                $path = $request->file('image')->store('products', 'public');
-                $product->image = $path;
+                $image = $request->file('image');
+                $filename = time() . '_' . $image->getClientOriginalName();
+
+                // Create products directory if it doesn't exist
+                $productsPath = public_path('products');
+                if (!File::exists($productsPath)) {
+                    File::makeDirectory($productsPath, 0755, true);
+                }
+
+                // Move image to public/products
+                $image->move($productsPath, $filename);
+
+                // Save path as: products/filename.jpg
+                $product->image = 'products/' . $filename;
             }
 
             $product->save();
@@ -81,12 +93,27 @@ class ProductsController extends Controller
             // Handle image upload
             if ($request->hasFile('image')) {
                 // Delete old image if exists
-                if ($product->image && Storage::disk('public')->exists($product->image)) {
-                    Storage::disk('public')->delete($product->image);
+                if ($product->image) {
+                    $oldImagePath = public_path($product->image);
+                    if (File::exists($oldImagePath)) {
+                        File::delete($oldImagePath);
+                    }
                 }
 
-                $path = $request->file('image')->store('products', 'public');
-                $product->image = $path;
+                $image = $request->file('image');
+                $filename = time() . '_' . $image->getClientOriginalName();
+
+                // Create products directory if it doesn't exist
+                $productsPath = public_path('products');
+                if (!File::exists($productsPath)) {
+                    File::makeDirectory($productsPath, 0755, true);
+                }
+
+                // Move image to public/products
+                $image->move($productsPath, $filename);
+
+                // Save path as: products/filename.jpg
+                $product->image = 'products/' . $filename;
             }
 
             $product->save();
@@ -111,8 +138,11 @@ class ProductsController extends Controller
             $product = Product::findOrFail($id);
 
             // Delete image if exists
-            if ($product->image && Storage::disk('public')->exists($product->image)) {
-                Storage::disk('public')->delete($product->image);
+            if ($product->image) {
+                $imagePath = public_path($product->image);
+                if (File::exists($imagePath)) {
+                    File::delete($imagePath);
+                }
             }
 
             $product->delete();
