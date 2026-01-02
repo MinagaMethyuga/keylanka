@@ -112,7 +112,7 @@
                              data-product-id="{{ $item->id }}"
                              data-product-title="{{ $item->title }}"
                              data-product-price="{{ $item->price }}"
-                             data-product-image="../{{ $item->image }}">
+                             data-product-image="{{ asset('storage/' . $item->image) }}"
                             <div class="aspect-square overflow-hidden bg-gray-100 dark:bg-gray-900/50">
                                 @if(empty($item->stock))
                                     <div class="absolute top-2 right-2 bg-red-500/30 px-2 rounded-2xl z-50">
