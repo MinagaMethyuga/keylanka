@@ -120,7 +120,7 @@
                                     </div>
                                 @endif
                                 <img class="h-full w-full object-contain object-center transition-transform duration-300 group-hover:scale-105 p-2"
-                                     src="../{{ $item->image }}"
+                                     src="{{ asset('storage/' . $item->image) }}"
                                      alt="{{ $item->title }}">
                             </div>
                             <div class="flex flex-1 flex-col p-4">
