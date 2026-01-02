@@ -109,7 +109,7 @@
                                 <td class="p-4 whitespace-nowrap">
                                     <div class="flex items-center gap-4">
                                         <div class="bg-center bg-no-repeat aspect-square bg-contain rounded-md size-10"
-                                             style="background-image: url('{{ asset('storage/' . $item->image) }}');"></div>
+                                             style="background-image: url('{{ asset($item->image) }}');"></div>
                                         <span class="font-medium text-black dark:text-text-primary-dark">{{$item->title}}</span>
                                     </div>
                                 </td>
