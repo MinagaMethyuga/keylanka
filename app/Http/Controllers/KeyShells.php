@@ -9,7 +9,7 @@ class KeyShells extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::where('category', 'key-shells'); // Adjust category name as needed
+        $query = Product::where('category', 'key-shell'); // Adjust category name as needed
 
         $this->applySorting($query, $request->get('sort', 'featured'));
 
