@@ -139,7 +139,13 @@ class ProductsController extends Controller
 
             // Delete image if exists
             if ($product->image) {
-                $imagePath = public_path($product->image);
+                // Check in public_html first
+                $imagePath = base_path('../public_html/' . $product->image);
+                if (!File::exists($imagePath)) {
+                    // Fallback to standard public path
+                    $imagePath = public_path($product->image);
+                }
+
                 if (File::exists($imagePath)) {
                     File::delete($imagePath);
                 }
