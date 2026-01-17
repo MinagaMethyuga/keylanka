@@ -9,13 +9,26 @@ class KeyShells extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::where('category', 'key-shell'); // Adjust category name as needed
+        $query = Product::where('category', 'key-shell');
 
         $this->applySorting($query, $request->get('sort', 'featured'));
 
         $items = $query->paginate(12);
 
         $brandname = 'Key Shells';
+        return view('ProductsShowCase', compact('items', 'brandname'));
+    }
+
+    public function showByBrand($brand, Request $request)
+    {
+        $query = Product::where('category', 'key-shell')
+            ->where('brand', ucfirst($brand));
+
+        $this->applySorting($query, $request->get('sort', 'featured'));
+
+        $items = $query->paginate(12);
+
+        $brandname = ucfirst($brand) . ' Key Shells';
         return view('ProductsShowCase', compact('items', 'brandname'));
     }
 

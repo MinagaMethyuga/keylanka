@@ -9,13 +9,26 @@ class KeyCovers extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::where('category', 'key-covers'); // Adjust category name as needed
+        $query = Product::where('category', 'key-covers');
 
         $this->applySorting($query, $request->get('sort', 'featured'));
 
         $items = $query->paginate(12);
 
         $brandname = 'Key Covers';
+        return view('ProductsShowCase', compact('items', 'brandname'));
+    }
+
+    public function showByBrand($brand, Request $request)
+    {
+        $query = Product::where('category', 'key-covers')
+            ->where('brand', ucfirst($brand));
+
+        $this->applySorting($query, $request->get('sort', 'featured'));
+
+        $items = $query->paginate(12);
+
+        $brandname = ucfirst($brand) . ' Key Covers';
         return view('ProductsShowCase', compact('items', 'brandname'));
     }
 

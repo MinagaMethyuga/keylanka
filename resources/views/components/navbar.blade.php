@@ -8,10 +8,10 @@
         <div class="hidden h-full items-center gap-9 lg:flex" id="NavLinks">
             <a class="text-xs xl:text-sm font-medium hover:text-primary cursor-pointer transition-colors duration-200" href="{{route('products.index')}}" id="LocksmithTrigger">Locksmith Tools</a>
             <a class="text-xs xl:text-sm font-medium hover:text-primary cursor-pointer transition-colors duration-200" href="{{route('FlipKey.index')}}">Flip Keys</a>
-            <a class="text-xs xl:text-sm font-medium hover:text-primary cursor-pointer transition-colors duration-200" href="{{route('KeyShells.index')}}">Key Shells</a>
+            <a class="text-xs xl:text-sm font-medium hover:text-primary cursor-pointer transition-colors duration-200" href="{{route('KeyShells.index')}}" id="KeyShellsTrigger">Key Shells</a>
             <a class="text-xs xl:text-sm font-medium hover:text-primary cursor-pointer transition-colors duration-200" href="{{route('Remote.index')}}" id="RemoteKeysTrigger">Remote Keys</a>
             <a class="text-xs xl:text-sm font-medium hover:text-primary cursor-pointer transition-colors duration-200" href="{{route('Smart.index')}}" id="SmartKeysTrigger">Smart Keys</a>
-            <a class="text-xs xl:text-sm font-medium hover:text-primary cursor-pointer transition-colors duration-200" href="{{route('KeyCover.index')}}">Key Covers</a>
+            <a class="text-xs xl:text-sm font-medium hover:text-primary cursor-pointer transition-colors duration-200" href="{{route('KeyCover.index')}}" id="KeyCoverTrigger">Key Covers</a>
             <a class="text-xs xl:text-sm font-medium hover:text-primary cursor-pointer transition-colors duration-200" href="{{route('Other.index')}}">Others</a>
             <a class="text-xs xl:text-sm font-medium hover:text-primary cursor-pointer transition-colors duration-200" href="{{route('AboutUs')}}">Contact Us</a>
         </div>
@@ -36,6 +36,12 @@
         <a class="h-[90%] w-[10rem] bg-neutral-400 rounded-md flex items-center justify-center text-white cursor-pointer hover:scale-105 transition-transform duration-200" href="{{route('products.Other')}}">Others</a>
     </div>
 
+    <div class="w-full h-[0px] bg-white absolute top-16 left-0 z-30 transition-all duration-300 ease-out opacity-0 flex justify-center gap-10 items-center border-t border-gray-200 shadow-xl overflow-hidden pointer-events-none" id="KeyShellsDropDown">
+        @foreach(['Toyota', 'Honda', 'Suzuki', 'Nissan', 'Mazda', 'Benz', 'Daihatsu', 'Others'] as $brand)
+            <a class="h-[90%] w-[10rem] bg-neutral-400 rounded-md flex items-center justify-center text-white cursor-pointer hover:scale-105 transition-transform duration-200" href="{{ route('KeyShells.brand', ['brand' => strtolower($brand)]) }}">{{ $brand }}</a>
+        @endforeach
+    </div>
+
     <div class="w-full h-[0px] bg-white absolute top-16 left-0 z-30 transition-all duration-300 ease-out opacity-0 flex justify-center gap-10 items-center border-t border-gray-200 shadow-xl overflow-hidden pointer-events-none" id="RemoteKeysDropDown">
         @foreach(['Toyota', 'Honda', 'Suzuki', 'Nissan', 'Mazda', 'Benz', 'Daihatsu', 'Others'] as $brand)
             <a class="h-[90%] w-[10rem] bg-neutral-400 rounded-md flex items-center justify-center text-white cursor-pointer hover:scale-105 transition-transform duration-200" href="{{ route('Remote.brand', ['brand' => strtolower($brand)]) }}">{{ $brand }}</a>
@@ -45,6 +51,12 @@
     <div class="w-full h-[0px] bg-white absolute top-16 left-0 z-30 transition-all duration-300 ease-out opacity-0 flex justify-center gap-10 items-center border-t border-gray-200 shadow-xl overflow-hidden pointer-events-none" id="SmartKeysDropDown">
         @foreach(['Toyota', 'Honda', 'Suzuki', 'Nissan', 'Mazda', 'Benz', 'Daihatsu', 'Others'] as $brand)
             <a class="h-[90%] w-[10rem] bg-neutral-400 rounded-md flex items-center justify-center text-white cursor-pointer hover:scale-105 transition-transform duration-200" href="{{ route('Smart.brand', ['brand' => strtolower($brand)]) }}">{{ $brand }}</a>
+        @endforeach
+    </div>
+
+    <div class="w-full h-[0px] bg-white absolute top-16 left-0 z-30 transition-all duration-300 ease-out opacity-0 flex justify-center gap-10 items-center border-t border-gray-200 shadow-xl overflow-hidden pointer-events-none" id="KeyCoverDropDown">
+        @foreach(['Toyota', 'Honda', 'Suzuki', 'Nissan', 'Mazda', 'Benz', 'Daihatsu', 'Others'] as $brand)
+            <a class="h-[90%] w-[10rem] bg-neutral-400 rounded-md flex items-center justify-center text-white cursor-pointer hover:scale-105 transition-transform duration-200" href="{{ route('KeyCover.brand', ['brand' => strtolower($brand)]) }}">{{ $brand }}</a>
         @endforeach
     </div>
 </div>
@@ -80,7 +92,19 @@
         </div>
 
         <a class="text-base font-semibold py-3 px-2 text-text-light-primary dark:text-text-dark-primary hover:bg-primary/10 rounded-lg transition-colors duration-200" href="{{route('FlipKey.index')}}">Flip Keys</a>
-        <a class="text-base font-semibold py-3 px-2 text-text-light-primary dark:text-text-dark-primary hover:bg-primary/10 rounded-lg transition-colors duration-200" href="{{route('KeyShells.index')}}">Key Shells</a>
+
+        {{-- Key Shells --}}
+        <div class="w-full">
+            <button class="w-full flex justify-between items-center py-3 px-2 text-base font-semibold text-text-light-primary dark:text-text-dark-primary hover:bg-primary/10 rounded-lg transition-colors duration-200 whitespace-nowrap" id="MobileKeyShellsTrigger">
+                Key Shells
+                <span class="material-symbols-outlined text-xl transition-transform duration-300">expand_more</span>
+            </button>
+            <div class="hidden grid-cols-2 min-w-full gap-1 pl-4 pb-2" id="MobileKeyShellsDropdown">
+                @foreach(['Toyota','Honda','Suzuki','Nissan','Mazda','Benz','Daihatsu','Others'] as $brand)
+                    <a class="py-2 px-4 text-sm font-medium text-secondary-light dark:text-secondary-dark hover:text-primary transition-colors duration-200 rounded-lg" href="{{ route('KeyShells.brand', ['brand' => strtolower($brand)]) }}">- {{ $brand }}</a>
+                @endforeach
+            </div>
+        </div>
 
         {{-- Remote --}}
         <div class="w-full">
@@ -108,7 +132,19 @@
             </div>
         </div>
 
-        <a class="text-base font-semibold py-3 px-2 text-text-light-primary dark:text-text-dark-primary hover:bg-primary/10 rounded-lg transition-colors duration-200" href="{{route('KeyCover.index')}}">Key Covers</a>
+        {{-- Key Covers --}}
+        <div class="w-full">
+            <button class="w-full flex justify-between items-center py-3 px-2 text-base font-semibold text-text-light-primary dark:text-text-dark-primary hover:bg-primary/10 rounded-lg transition-colors duration-200 whitespace-nowrap" id="MobileKeyCoverTrigger">
+                Key Covers
+                <span class="material-symbols-outlined text-xl transition-transform duration-300">expand_more</span>
+            </button>
+            <div class="hidden grid-cols-2 min-w-full gap-1 pl-4 pb-2" id="MobileKeyCoverDropdown">
+                @foreach(['Toyota','Honda','Suzuki','Nissan','Mazda','Benz','Daihatsu','Others'] as $brand)
+                    <a class="py-2 px-4 text-sm font-medium text-secondary-light dark:text-secondary-dark hover:text-primary transition-colors duration-200 rounded-lg" href="{{ route('KeyCover.brand', ['brand' => strtolower($brand)]) }}">- {{ $brand }}</a>
+                @endforeach
+            </div>
+        </div>
+
         <a class="text-base font-semibold py-3 px-2 text-text-light-primary dark:text-text-dark-primary hover:bg-primary/10 rounded-lg transition-colors duration-200" href="{{route('Other.index')}}">Others</a>
         <a class="text-base font-semibold py-3 px-2 text-text-light-primary dark:text-text-dark-primary hover:bg-primary/10 rounded-lg transition-colors duration-200" href="{{route('AboutUs')}}">Contact Us</a>
     </div>

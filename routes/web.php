@@ -20,11 +20,13 @@ Route::get('/LocksmithTools/xHorse', [App\Http\Controllers\LocksmithTools::class
 Route::get('/LocksmithTools/Other', [App\Http\Controllers\LocksmithTools::class, 'OtherIndex'])->name('products.Other');
 Route::get('/FlipKeys', [App\Http\Controllers\FlipKeys::class, 'index'])->name('FlipKey.index');
 Route::get('/KeyShells', [App\Http\Controllers\KeyShells::class, 'index'])->name('KeyShells.index');
+Route::get('/KeyShells/{brand}', [App\Http\Controllers\KeyShells::class, 'showByBrand'])->name('KeyShells.brand');
 Route::get('/RemoteKeys', [App\Http\Controllers\RemoteKeys::class, 'index'])->name('Remote.index');
 Route::get('/RemoteKeys/{brand}', [App\Http\Controllers\RemoteKeys::class, 'showByBrand'])->name('Remote.brand');
 Route::get('/SmartKeys', [App\Http\Controllers\SmartKey::class, 'index'])->name('Smart.index');
 Route::get('/SmartKeys/{brand}', [App\Http\Controllers\SmartKey::class, 'showByBrand'])->name('Smart.brand');
 Route::get('/KeyCovers', [App\Http\Controllers\KeyCovers::class, 'index'])->name('KeyCover.index');
+Route::get('/KeyCovers/{brand}', [App\Http\Controllers\KeyCovers::class, 'showByBrand'])->name('KeyCover.brand');
 Route::get('/Other', [App\Http\Controllers\Other::class, 'index'])->name('Other.index');
 
 Route::post('/verify-code', [\App\Http\Controllers\EmailController::class, 'verifyCode'])->name('verify.code');

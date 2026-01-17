@@ -4,11 +4,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const locksmithTrigger = document.getElementById('LocksmithTrigger');
     const locksmithDropdown = document.getElementById('LockSmithDropdown');
 
+    const keyShellsTrigger = document.getElementById('KeyShellsTrigger');
+    const keyShellsDropdown = document.getElementById('KeyShellsDropDown');
+
     const remoteKeysTrigger = document.getElementById('RemoteKeysTrigger');
     const remoteKeysDropdown = document.getElementById('RemoteKeysDropDown');
 
     const smartKeysTrigger = document.getElementById('SmartKeysTrigger');
     const smartKeysDropdown = document.getElementById('SmartKeysDropDown');
+
+    const keyCoverTrigger = document.getElementById('KeyCoverTrigger');
+    const keyCoverDropdown = document.getElementById('KeyCoverDropDown');
 
     let currentDropdown = null;
     let currentTrigger = null;
@@ -88,13 +94,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Setup all dropdowns
     setupDropdown(locksmithTrigger, locksmithDropdown);
+    setupDropdown(keyShellsTrigger, keyShellsDropdown);
     setupDropdown(remoteKeysTrigger, remoteKeysDropdown);
     setupDropdown(smartKeysTrigger, smartKeysDropdown);
+    setupDropdown(keyCoverTrigger, keyCoverDropdown);
 
     // Close dropdowns when clicking outside
     document.addEventListener('click', function(e) {
         if (currentDropdown) {
-            const triggers = [locksmithTrigger, remoteKeysTrigger, smartKeysTrigger];
+            const triggers = [locksmithTrigger, keyShellsTrigger, remoteKeysTrigger, smartKeysTrigger, keyCoverTrigger];
             const isClickOnTrigger = triggers.some(trigger => trigger && trigger.contains(e.target));
             const isClickOnDropdown = currentDropdown.contains(e.target);
 
@@ -127,8 +135,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Mobile accordion handlers
     const accordions = [
         { trigger: 'MobileLocksmithTrigger', dropdown: 'MobileLocksmithDropdown' },
+        { trigger: 'MobileKeyShellsTrigger', dropdown: 'MobileKeyShellsDropdown' },
         { trigger: 'MobileRemoteKeysTrigger', dropdown: 'MobileRemoteKeysDropdown' },
-        { trigger: 'MobileSmartKeysTrigger', dropdown: 'MobileSmartKeysDropdown' }
+        { trigger: 'MobileSmartKeysTrigger', dropdown: 'MobileSmartKeysDropdown' },
+        { trigger: 'MobileKeyCoverTrigger', dropdown: 'MobileKeyCoverDropdown' }
     ];
 
     accordions.forEach(({ trigger, dropdown }) => {
