@@ -111,3 +111,9 @@ Route::get('/clear-cache', function () {
     Artisan::call('optimize:clear');
     return 'Cache cleared';
 });
+
+// Temporary: run migrations when you visit this URL (remove in production)
+Route::get('/run-migrate', function () {
+    Artisan::call('migrate', ['--force' => true]);
+    return 'Migrations completed.';
+});
