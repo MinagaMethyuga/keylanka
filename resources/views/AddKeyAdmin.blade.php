@@ -169,7 +169,7 @@
                                     <span class="material-symbols-outlined text-primary text-5xl mb-3">upload_file</span>
                                     <p class="text-white font-medium">Drag & drop images here, or <span class="text-primary font-bold">click to browse</span></p>
                                     <p class="text-sm text-[#92a4c9] mt-1">PNG, JPG, GIF up to 10MB</p>
-                                    <input type="file" id="file-input" multiple accept="image/*" class="hidden" name="image">
+                                    <input type="file" id="file-input" multiple accept="image/*" class="hidden" name="images[]">
                                 </div>
 
                                 <!-- Preview Grid -->
@@ -178,8 +178,7 @@
                                 <div class="flex justify-end gap-4 mt-4">
 {{--                                    <button class="px-6 py-3 rounded-lg text-white font-medium bg-[#324467] hover:bg-[#455a85] transition-colors">--}}
 {{--                                        Cancel--}}
-{{--                                    </button>--}}
-                                    <button type="submit" class="px-6 py-3 rounded-lg text-white font-medium bg-primary hover:bg-primary/90 transition-colors">
+                                    <button type="submit" id="submit-btn" class="px-6 py-3 rounded-lg text-white font-medium bg-primary hover:bg-primary/90 transition-colors">
                                         Add Product
                                     </button>
                                 </div>
@@ -303,6 +302,27 @@
             reader.readAsDataURL(file);
         });
     }
+
+    // Submit form with only the files still in the preview (browser sends full file input otherwise)
+    const form = document.querySelector('form[action="{{ route('addProducts.store') }}"]');
+    form.addEventListener('submit', function(e) {
+        if (uploadedFiles.length === 0) return; // Let normal validation handle "no images"
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append('_token', form.querySelector('input[name="_token"]').value);
+        ['category', 'title', 'price', 'brand', 'stock', 'description'].forEach(name => {
+            const el = form.querySelector(`[name="${name}"]:not([disabled])`);
+            if (el) formData.append(name, el.value ?? '');
+        });
+        uploadedFiles.forEach(file => formData.append('images[]', file));
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Adding...';
+        fetch(form.action, { method: 'POST', body: formData })
+            .then(r => r.redirected ? (window.location = r.url) : r.json())
+            .then(() => { submitBtn.disabled = false; submitBtn.textContent = 'Add Product'; })
+            .catch(() => { submitBtn.disabled = false; submitBtn.textContent = 'Add Product'; });
+    });
 </script>
 </body>
 </html>

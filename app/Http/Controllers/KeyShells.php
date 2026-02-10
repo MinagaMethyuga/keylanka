@@ -9,7 +9,7 @@ class KeyShells extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::where('category', 'key-shell');
+        $query = Product::with('images')->where('category', 'key-shell');
 
         $this->applySorting($query, $request->get('sort', 'featured'));
 
@@ -21,7 +21,7 @@ class KeyShells extends Controller
 
     public function showByBrand($brand, Request $request)
     {
-        $query = Product::where('category', 'key-shell')
+        $query = Product::with('images')->where('category', 'key-shell')
             ->where('brand', ucfirst($brand));
 
         $this->applySorting($query, $request->get('sort', 'featured'));

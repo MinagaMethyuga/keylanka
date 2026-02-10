@@ -29,6 +29,8 @@ Route::get('/KeyCovers', [App\Http\Controllers\KeyCovers::class, 'index'])->name
 Route::get('/KeyCovers/{brand}', [App\Http\Controllers\KeyCovers::class, 'showByBrand'])->name('KeyCover.brand');
 Route::get('/Other', [App\Http\Controllers\Other::class, 'index'])->name('Other.index');
 
+Route::get('/product/{id}', [App\Http\Controllers\ProductsController::class, 'show'])->name('product.show');
+
 Route::post('/verify-code', [\App\Http\Controllers\EmailController::class, 'verifyCode'])->name('verify.code');
 Route::post('/verify-email', [\App\Http\Controllers\EmailController::class, 'verifyEmail'])->name('verify.email');
 Route::get('/payment/return', [\App\Http\Controllers\PaymentController::class, 'paymentReturn'])->name('payment.return');

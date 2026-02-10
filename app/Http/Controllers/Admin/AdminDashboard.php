@@ -171,7 +171,7 @@ class AdminDashboard extends Controller
 
     public function ManageKeyIndex()
     {
-        $items = Product::all();
+        $items = Product::with('images')->get();
 
         return view('AdminManageProducts', compact('items'));
     }

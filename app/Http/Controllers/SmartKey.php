@@ -11,7 +11,7 @@ class SmartKey extends Controller
 
     public function index(Request $request)
     {
-        $query = Product::where('category', 'smart'); // Adjust category name as needed
+        $query = Product::with('images')->where('category', 'smart'); // Adjust category name as needed
 
         $this->applySorting($query, $request->get('sort', 'featured'));
 
@@ -26,12 +26,12 @@ class SmartKey extends Controller
         $displayBrand = ucfirst($brand);
 
         if (strtolower($brand) === 'others') {
-            $query = Product::where('category', 'smart') // Adjust category name
+            $query = Product::with('images')->where('category', 'smart') // Adjust category name
             ->whereNotIn('brand', $this->mainBrands);
 
             $brandname = "Smart Keys (Others)";
         } else {
-            $query = Product::where('category', 'smart-keys') // Adjust category name
+            $query = Product::with('images')->where('category', 'smart-keys') // Adjust category name
             ->where('brand', $displayBrand);
 
             $brandname = "Smart Keys ({$displayBrand})";

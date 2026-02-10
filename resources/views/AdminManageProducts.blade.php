@@ -109,7 +109,7 @@
                                 <td class="p-4 whitespace-nowrap">
                                     <div class="flex items-center gap-4">
                                         <div class="bg-center bg-no-repeat aspect-square bg-contain rounded-md size-10"
-                                             style="background-image: url('{{ asset($item->image) }}');"></div>
+                                             style="background-image: url('{{ asset($item->display_image ?? $item->image) }}');"></div>
                                         <span class="font-medium text-black dark:text-text-primary-dark">{{$item->title}}</span>
                                     </div>
                                 </td>
@@ -208,8 +208,10 @@
                     <textarea name="description" id="edit_description" rows="4" required class="w-full px-4 py-2 rounded-lg bg-white dark:bg-component-dark text-black dark:text-text-primary-dark border border-gray-300 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-action-blue"></textarea>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-black dark:text-text-primary-dark mb-2">Image (leave empty to keep current)</label>
-                    <input type="file" name="image" accept="image/*" class="w-full px-4 py-2 rounded-lg bg-white dark:bg-component-dark text-black dark:text-text-primary-dark border border-gray-300 dark:border-white/10">
+                    <label class="block text-sm font-medium text-black dark:text-text-primary-dark mb-2">Images</label>
+                    <div id="edit-existing-images" class="flex flex-wrap gap-2 mb-3"></div>
+                    <input type="file" name="images[]" id="edit_images" multiple accept="image/*" class="w-full px-4 py-2 rounded-lg bg-white dark:bg-component-dark text-black dark:text-text-primary-dark border border-gray-300 dark:border-white/10">
+                    <p class="text-xs text-gray-500 dark:text-text-secondary-dark mt-1">Add more images; check the ones above to remove.</p>
                 </div>
             </div>
             <div class="mt-6 flex justify-end gap-3">
@@ -380,6 +382,24 @@
                 document.getElementById('edit_category').value = product.category || '';
                 document.getElementById('edit_brand').value = product.brand || '';
                 document.getElementById('edit_description').value = product.description;
+
+                const container = document.getElementById('edit-existing-images');
+                container.innerHTML = '';
+                (product.images || []).forEach(img => {
+                    const wrap = document.createElement('label');
+                    wrap.className = 'inline-flex flex-col items-center gap-1 cursor-pointer';
+                    wrap.innerHTML = `
+                        <div class="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-300 dark:border-white/20 bg-gray-100 dark:bg-gray-800">
+                            <img src="/${img.path}" alt="" class="w-full h-full object-cover">
+                        </div>
+                        <span class="text-xs text-gray-600 dark:text-text-secondary-dark flex items-center gap-1">
+                            <input type="checkbox" name="delete_image_ids[]" value="${img.id}" class="rounded">
+                            Remove
+                        </span>
+                    `;
+                    container.appendChild(wrap);
+                });
+                document.getElementById('edit_images').value = '';
 
                 document.getElementById('editForm').action = `/admin/products/${productId}`;
                 document.getElementById('editModal').classList.remove('hidden');

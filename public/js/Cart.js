@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     title: productCard.dataset.productTitle,
                     price: parseFloat(productCard.dataset.productPrice),
                     image: productCard.dataset.productImage,
-                    quantity: 1
+                    quantity: parseInt(productCard.dataset.quantity, 10) || 1
                 };
 
                 addToCart(product);
@@ -106,12 +106,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add to cart function
     function addToCart(product) {
+        const qty = product.quantity || 1;
         const existingItem = cart.find(item => item.id === product.id);
 
         if (existingItem) {
-            existingItem.quantity += 1;
+            existingItem.quantity += qty;
         } else {
-            cart.push(product);
+            cart.push({ ...product, quantity: qty });
         }
 
         saveCart();

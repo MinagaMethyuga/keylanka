@@ -9,7 +9,7 @@ class Other extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::where('category', 'other'); // Adjust category name as needed
+        $query = Product::with('images')->where('category', 'other'); // Adjust category name as needed
 
         $this->applySorting($query, $request->get('sort', 'featured'));
 

@@ -112,19 +112,21 @@
                              data-product-id="{{ $item->id }}"
                              data-product-title="{{ $item->title }}"
                              data-product-price="{{ $item->price }}"
-                             data-product-image="{{ asset($item->image) }}">
-                            <div class="aspect-square overflow-hidden bg-gray-100 dark:bg-gray-900/50">
+                             data-product-image="{{ asset($item->display_image ?? $item->image) }}">
+                            <a href="{{ route('product.show', $item->id) }}" class="aspect-square overflow-hidden bg-gray-100 dark:bg-gray-900/50 block">
                                 @if(empty($item->stock))
                                     <div class="absolute top-2 right-2 bg-red-500/30 px-2 rounded-2xl z-50">
                                         <p class="text-red-500">Out Of Stock</p>
                                     </div>
                                 @endif
                                 <img class="h-full w-full object-contain object-center transition-transform duration-300 group-hover:scale-105 p-2"
-                                     src="{{ asset($item->image) }}"
+                                     src="{{ asset($item->display_image ?? $item->image) }}"
                                      alt="{{ $item->title }}">
-                            </div>
+                            </a>
                             <div class="flex flex-1 flex-col p-4">
-                                <h3 class="text-base font-bold text-[#1A1A1A] dark:text-white">{{ $item->title }}</h3>
+                                <a href="{{ route('product.show', $item->id) }}" class="hover:text-primary transition-colors">
+                                    <h3 class="text-base font-bold text-[#1A1A1A] dark:text-white">{{ $item->title }}</h3>
+                                </a>
                                 @if(!empty($item->brand))
                                     <p class="mt-1 text-sm font-regular text-[#6c757d]">Brand:{{$item->brand}}</p>
                                 @endif
@@ -132,9 +134,9 @@
                             </div>
                             <div class="absolute bottom-0 left-0 right-0 translate-y-full transform bg-white dark:bg-surface-dark p-4 transition-transform duration-300 group-hover:translate-y-0">
                                 @if(empty($item->stock))
-                                    <button class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-white text-red-700 text-sm font-bold leading-normal tracking-[0.015em]">
-                                        Out Of Stock
-                                    </button>
+                                    <a href="{{ route('product.show', $item->id) }}" class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-white text-red-700 text-sm font-bold leading-normal tracking-[0.015em]">
+                                        View Product
+                                    </a>
                                 @else
                                     <button class="add-to-cart-btn flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-red-700 dark:hover:bg-red-500">
                                         Add to Cart

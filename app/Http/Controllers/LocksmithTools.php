@@ -9,7 +9,7 @@ class LocksmithTools extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::where('category', 'locksmith-tools');
+        $query = Product::with('images')->where('category', 'locksmith-tools');
 
         // Apply sorting
         $this->applySorting($query, $request->get('sort', 'featured'));
@@ -23,7 +23,7 @@ class LocksmithTools extends Controller
 
     public function KeyDIYIndex(Request $request)
     {
-        $query = Product::where('category', 'locksmith-tools')
+        $query = Product::with('images')->where('category', 'locksmith-tools')
             ->where('brand', 'KeyDiy');
 
         // Apply sorting
@@ -38,7 +38,7 @@ class LocksmithTools extends Controller
 
     public function xHorseIndex(Request $request)
     {
-        $query = Product::where('category', 'locksmith-tools')
+        $query = Product::with('images')->where('category', 'locksmith-tools')
             ->where('brand', 'xHorse');
 
         // Apply sorting
@@ -53,7 +53,7 @@ class LocksmithTools extends Controller
 
     public function OtherIndex(Request $request)
     {
-        $query = Product::where('category', 'locksmith-tools')
+        $query = Product::with('images')->where('category', 'locksmith-tools')
             ->where('brand', 'Other');
 
         // Apply sorting

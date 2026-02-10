@@ -12,7 +12,7 @@ class RemoteKeys extends Controller
 
     public function index(Request $request)
     {
-        $query = Product::where('category', 'remote');
+        $query = Product::with('images')->where('category', 'remote');
 
         // Apply sorting
         $this->applySorting($query, $request->get('sort', 'featured'));
@@ -32,13 +32,13 @@ class RemoteKeys extends Controller
         // Check if this is the "Others" category
         if (strtolower($brand) === 'others') {
             // Get all products NOT in the main brands list
-            $query = Product::where('category', 'remote')
+            $query = Product::with('images')->where('category', 'remote')
                 ->whereNotIn('brand', $this->mainBrands);
 
             $brandname = "Remote Keys (Others)";
         } else {
             // Get products filtered by specific brand
-            $query = Product::where('category', 'remote')
+            $query = Product::with('images')->where('category', 'remote')
                 ->where('brand', $displayBrand);
 
             $brandname = "Remote Keys ({$displayBrand})";

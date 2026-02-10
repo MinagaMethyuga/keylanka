@@ -9,7 +9,7 @@ class FlipKeys extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::where('category', 'flip-keys'); // Adjust category name as needed
+        $query = Product::with('images')->where('category', 'flip-keys'); // Adjust category name as needed
 
         $this->applySorting($query, $request->get('sort', 'featured'));
 
