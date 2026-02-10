@@ -1,9 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Schema;
 use Laravel\Fortify\Features;
 use Livewire\Volt\Volt;
 
@@ -113,38 +111,4 @@ Route::post('/addProducts', [App\Http\Controllers\ProductsController::class, 'st
 Route::get('/clear-cache', function () {
     Artisan::call('optimize:clear');
     return 'Cache cleared';
-});
-
-// Temporary: run migrations when you visit this URL (remove in production)
-Route::get('/run-migrate', function () {
-    Artisan::call('migrate', ['--force' => true]);
-    return 'Migrations completed.';
-});
-
-// Temporary: fix migrations table when tables already exist (run this once, then use /run-migrate)
-Route::get('/sync-migrations', function () {
-    $map = [
-        '0001_01_01_000000_create_users_table' => 'users',
-        '0001_01_01_000001_create_cache_table' => 'cache',
-        '0001_01_01_000002_create_jobs_table' => 'jobs',
-        '2025_09_02_075243_add_two_factor_columns_to_users_table' => 'users',
-        '2025_11_26_161847_create_products_table' => 'products',
-        '2025_11_28_195410_create_sessions_table' => 'sessions',
-        '2025_12_02_130948_create_orders_table' => 'orders',
-        '2026_01_28_000000_create_product_images_table' => 'product_images',
-    ];
-    $batch = (int) DB::table('migrations')->max('batch') + 1;
-    $inserted = [];
-    foreach ($map as $migration => $table) {
-        if (!Schema::hasTable($table)) {
-            continue;
-        }
-        if (DB::table('migrations')->where('migration', $migration)->exists()) {
-            continue;
-        }
-        DB::table('migrations')->insert(['migration' => $migration, 'batch' => $batch]);
-        $inserted[] = $migration;
-        $batch++;
-    }
-    return 'Synced migrations: ' . (count($inserted) ? implode(', ', $inserted) : 'none (all up to date or tables missing)');
 });
