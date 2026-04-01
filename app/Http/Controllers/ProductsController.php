@@ -18,6 +18,7 @@ class ProductsController extends Controller
         $product = Product::with('images')->findOrFail($id);
         $categoryRoute = $this->categoryRoute($product->category);
         $categoryName = $this->categoryName($product->category);
+
         return view('ProductShow', compact('product', 'categoryRoute', 'categoryName'));
     }
 
@@ -52,11 +53,10 @@ class ProductsController extends Controller
     public function store(Request $request)
     {
         try {
-            // Validate input
             $validated = $request->validate([
-                'title' => 'required',
+                'title' => 'required|string',
                 'price' => 'required|numeric',
-                'description' => 'required',
+                'description' => 'required|string',
                 'brand' => 'nullable|string',
                 'stock' => 'required|numeric|min:0',
                 'category' => 'nullable|string',
@@ -64,7 +64,6 @@ class ProductsController extends Controller
                 'images.*' => 'image|max:2048',
             ]);
 
-            // Create product
             $product = new Product();
             $product->title = $validated['title'];
             $product->price = $validated['price'];
@@ -72,21 +71,20 @@ class ProductsController extends Controller
             $product->stock = $validated['stock'];
             $product->description = $validated['description'];
             $product->category = $validated['category'] ?? null;
+            $product->image = null;
             $product->save();
 
-            // Handle multiple image uploads
             if ($request->hasFile('images')) {
-                $images = $request->file('images');
-
-                // Create products directory if it doesn't exist
                 $productsPath = public_path('products');
+
                 if (!File::exists($productsPath)) {
                     File::makeDirectory($productsPath, 0755, true);
                 }
 
-                foreach ($images as $index => $image) {
-                    $filename = time() . '_' . $image->getClientOriginalName();
+                foreach ($request->file('images') as $index => $image) {
+                    $filename = time() . '_' . uniqid() . '_' . $image->getClientOriginalName();
                     $image->move($productsPath, $filename);
+
                     $path = 'products/' . $filename;
 
                     $productImage = new ProductImage([
@@ -96,7 +94,7 @@ class ProductsController extends Controller
 
                     $product->images()->save($productImage);
 
-                    // Also keep the first image as the legacy single image field
+                    // Keep first image in legacy single-image column too
                     if ($index === 0) {
                         $product->image = $path;
                     }
@@ -106,12 +104,10 @@ class ProductsController extends Controller
             }
 
             return redirect()->back()->with('success', 'Product added successfully!');
-
         } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->errors())
                 ->withInput();
-
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', 'Failed to add product: ' . $e->getMessage())
@@ -122,12 +118,12 @@ class ProductsController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $product = Product::findOrFail($id);
+            $product = Product::with('images')->findOrFail($id);
 
             $validated = $request->validate([
-                'title' => 'required',
+                'title' => 'required|string',
                 'price' => 'required|numeric',
-                'description' => 'required',
+                'description' => 'required|string',
                 'brand' => 'nullable|string',
                 'stock' => 'required|numeric|min:0',
                 'category' => 'nullable|string',
@@ -144,64 +140,90 @@ class ProductsController extends Controller
             $product->description = $validated['description'];
             $product->category = $validated['category'] ?? null;
 
-            // Remove images that were marked for deletion
+            // Delete selected images
             $deleteIds = $request->input('delete_image_ids', []);
             if (!empty($deleteIds)) {
-                $toDelete = $product->images()->whereIn('id', $deleteIds)->get();
-                foreach ($toDelete as $img) {
-                    $path = public_path($img->path);
-                    if (File::exists($path)) {
-                        File::delete($path);
+                $imagesToDelete = $product->images()->whereIn('id', $deleteIds)->get();
+
+                foreach ($imagesToDelete as $img) {
+                    $fullPath = public_path($img->path);
+
+                    if (File::exists($fullPath)) {
+                        File::delete($fullPath);
                     }
+
                     $img->delete();
                 }
             }
 
-            // Add new images
+            // Add new uploaded images
             if ($request->hasFile('images')) {
                 $productsPath = public_path('products');
+
                 if (!File::exists($productsPath)) {
                     File::makeDirectory($productsPath, 0755, true);
                 }
-                $isFirst = $product->images()->count() === 0;
+
+                $hasAnyImagesAlready = $product->images()->count() > 0;
+
                 foreach ($request->file('images') as $index => $file) {
                     $filename = time() . '_' . uniqid() . '_' . $file->getClientOriginalName();
                     $file->move($productsPath, $filename);
+
                     $path = 'products/' . $filename;
+
+                    $isPrimary = !$hasAnyImagesAlready && $index === 0;
+
                     $product->images()->create([
                         'path' => $path,
-                        'is_primary' => $isFirst && $index === 0,
+                        'is_primary' => $isPrimary,
                     ]);
-                    if ($isFirst && $index === 0) {
+
+                    // If there was no image before, sync legacy field
+                    if ($isPrimary) {
                         $product->image = $path;
                     }
-                    $isFirst = false;
                 }
             }
 
-            // Ensure we have a primary image and product.image set
-            $primary = $product->images()->where('is_primary', true)->first();
-            if (!$primary) {
-                $first = $product->images()->first();
-                if ($first) {
-                    $first->update(['is_primary' => true]);
-                    $product->image = $first->path;
+            // Refresh relationship after deletes/adds
+            $product->load('images');
+
+            // Fix old products that only have legacy image but no product_images row
+            if ($product->images->count() === 0 && !empty($product->image)) {
+                $product->images()->create([
+                    'path' => $product->image,
+                    'is_primary' => true,
+                ]);
+
+                $product->load('images');
+            }
+
+            // Ensure exactly one primary image if images exist
+            $primary = $product->images->firstWhere('is_primary', true);
+
+            if ($primary) {
+                $product->image = $primary->path;
+            } else {
+                $firstImage = $product->images->first();
+
+                if ($firstImage) {
+                    ProductImage::where('product_id', $product->id)->update(['is_primary' => false]);
+                    $firstImage->update(['is_primary' => true]);
+                    $product->image = $firstImage->path;
                 } else {
+                    // Only set null if there are truly no images at all
                     $product->image = null;
                 }
-            } else {
-                $product->image = $primary->path;
             }
 
             $product->save();
 
             return redirect()->back()->with('success', 'Product updated successfully!');
-
         } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->errors())
                 ->withInput();
-
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', 'Failed to update product: ' . $e->getMessage())
@@ -212,28 +234,30 @@ class ProductsController extends Controller
     public function destroy($id)
     {
         try {
-            $product = Product::findOrFail($id);
+            $product = Product::with('images')->findOrFail($id);
 
-            // Delete all associated images from disk
             foreach ($product->images as $image) {
                 $imagePath = public_path($image->path);
+
                 if (File::exists($imagePath)) {
                     File::delete($imagePath);
                 }
             }
 
-            // Also delete legacy single image if set and not already covered
+            // Delete legacy single image too if it exists
             if ($product->image) {
                 $legacyPath = public_path($product->image);
+
                 if (File::exists($legacyPath)) {
                     File::delete($legacyPath);
                 }
             }
 
+            // Delete related image records first
+            $product->images()->delete();
             $product->delete();
 
             return redirect()->back()->with('success', 'Product deleted successfully!');
-
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', 'Failed to delete product: ' . $e->getMessage());
