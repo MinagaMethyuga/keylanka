@@ -10,9 +10,6 @@ use Illuminate\Support\Facades\File;
 
 class ProductsController extends Controller
 {
-    /**
-     * Public product detail page (used by all products).
-     */
     public function show($id)
     {
         $product = Product::with('images')->findOrFail($id);
@@ -78,11 +75,15 @@ class ProductsController extends Controller
                 $productsPath = public_path('products');
 
                 if (!File::exists($productsPath)) {
-                    File::makeDirectory($productsPath, 0755, true);
+                    File::makeDirectory($productsPath, 0755, true, true);
                 }
 
                 foreach ($request->file('images') as $index => $image) {
-                    $filename = time() . '_' . uniqid() . '_' . $image->getClientOriginalName();
+                    if (!$image->isValid()) {
+                        continue;
+                    }
+
+                    $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
                     $image->move($productsPath, $filename);
 
                     $path = 'products/' . $filename;
@@ -94,7 +95,6 @@ class ProductsController extends Controller
 
                     $product->images()->save($productImage);
 
-                    // Keep first image in legacy single-image column too
                     if ($index === 0) {
                         $product->image = $path;
                     }
@@ -140,7 +140,6 @@ class ProductsController extends Controller
             $product->description = $validated['description'];
             $product->category = $validated['category'] ?? null;
 
-            // Delete selected images
             $deleteIds = $request->input('delete_image_ids', []);
             if (!empty($deleteIds)) {
                 $imagesToDelete = $product->images()->whereIn('id', $deleteIds)->get();
@@ -156,18 +155,21 @@ class ProductsController extends Controller
                 }
             }
 
-            // Add new uploaded images
             if ($request->hasFile('images')) {
                 $productsPath = public_path('products');
 
                 if (!File::exists($productsPath)) {
-                    File::makeDirectory($productsPath, 0755, true);
+                    File::makeDirectory($productsPath, 0755, true, true);
                 }
 
                 $hasAnyImagesAlready = $product->images()->count() > 0;
 
                 foreach ($request->file('images') as $index => $file) {
-                    $filename = time() . '_' . uniqid() . '_' . $file->getClientOriginalName();
+                    if (!$file->isValid()) {
+                        continue;
+                    }
+
+                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
                     $file->move($productsPath, $filename);
 
                     $path = 'products/' . $filename;
@@ -179,17 +181,14 @@ class ProductsController extends Controller
                         'is_primary' => $isPrimary,
                     ]);
 
-                    // If there was no image before, sync legacy field
                     if ($isPrimary) {
                         $product->image = $path;
                     }
                 }
             }
 
-            // Refresh relationship after deletes/adds
             $product->load('images');
 
-            // Fix old products that only have legacy image but no product_images row
             if ($product->images->count() === 0 && !empty($product->image)) {
                 $product->images()->create([
                     'path' => $product->image,
@@ -199,7 +198,6 @@ class ProductsController extends Controller
                 $product->load('images');
             }
 
-            // Ensure exactly one primary image if images exist
             $primary = $product->images->firstWhere('is_primary', true);
 
             if ($primary) {
@@ -212,7 +210,6 @@ class ProductsController extends Controller
                     $firstImage->update(['is_primary' => true]);
                     $product->image = $firstImage->path;
                 } else {
-                    // Only set null if there are truly no images at all
                     $product->image = null;
                 }
             }
@@ -244,7 +241,6 @@ class ProductsController extends Controller
                 }
             }
 
-            // Delete legacy single image too if it exists
             if ($product->image) {
                 $legacyPath = public_path($product->image);
 
@@ -253,7 +249,6 @@ class ProductsController extends Controller
                 }
             }
 
-            // Delete related image records first
             $product->images()->delete();
             $product->delete();
 

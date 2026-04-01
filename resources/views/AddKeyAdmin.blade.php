@@ -195,20 +195,16 @@
 <script>
     document.querySelectorAll('.alert').forEach(alert => {
         setTimeout(() => {
-            // Fade out smoothly
             alert.style.transition = "opacity 0.5s ease";
             alert.style.opacity = "0";
-
-            // Remove from DOM after fade out
             setTimeout(() => alert.remove(), 500);
-        }, 3000); // 3000ms = 3 seconds
+        }, 3000);
     });
 
     function showCategoryFields() {
         const selector = document.getElementById('main-category-select');
         const selectedValue = selector.value;
 
-        // Get all product sections by ID
         const locksmithTools = document.getElementById('locksmith-tools-set');
         const flipKeys = document.getElementById('flip-key-set');
         const keyShells = document.getElementById('key-shell-set');
@@ -222,18 +218,14 @@
             remoteKeys, smartKeys, keyCovers, others
         ];
 
-        // Hide & disable all sections
         allSections.forEach(section => {
             if (section) {
                 section.classList.add('hidden');
-
-                // Disable all inputs inside hidden sections
                 section.querySelectorAll('input, textarea, select')
                     .forEach(el => el.disabled = true);
             }
         });
 
-        // Show the selected section
         let selectedSection;
 
         if (selectedValue === 'locksmith-tools') selectedSection = locksmithTools;
@@ -244,84 +236,80 @@
         else if (selectedValue === 'key-cover') selectedSection = keyCovers;
         else if (selectedValue === 'other-list') selectedSection = others;
 
-        // Show & enable selected section
         if (selectedSection) {
             selectedSection.classList.remove('hidden');
             selectedSection.querySelectorAll('input, textarea, select')
                 .forEach(el => el.disabled = false);
         }
     }
-    // Call the function once the page loads to display the default selected option's fields
-    document.addEventListener('DOMContentLoaded', showCategoryFields);
 
+    document.addEventListener('DOMContentLoaded', showCategoryFields);
 
     const uploadArea = document.getElementById('upload-area');
     const fileInput = document.getElementById('file-input');
     const previewGrid = document.getElementById('preview-grid');
+
     let uploadedFiles = [];
 
-    // Click to open file browser
-    uploadArea.addEventListener('click', () => fileInput.click());
+    function syncFileInput() {
+        const dt = new DataTransfer();
+        uploadedFiles.forEach(file => dt.items.add(file));
+        fileInput.files = dt.files;
+    }
 
-    // Handle file input selection
-    fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+    function renderPreviews() {
+        previewGrid.innerHTML = '';
 
-    // Handle drag & drop
-    uploadArea.addEventListener('dragover', (e) => e.preventDefault());
-    uploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        handleFiles(e.dataTransfer.files);
-    });
-
-    // Handle files
-    function handleFiles(files) {
-        Array.from(files).forEach(file => {
-            if (!file.type.startsWith('image/')) return;
-
-            uploadedFiles.push(file);
-
+        uploadedFiles.forEach((file, index) => {
             const reader = new FileReader();
+
             reader.onload = (e) => {
                 const div = document.createElement('div');
                 div.className = "relative group aspect-square";
 
                 div.innerHTML = `
-                <img class="w-full h-full object-cover rounded-lg" src="${e.target.result}" alt="${file.name}">
-                <button class="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span class="material-symbols-outlined !text-base">close</span>
-                </button>
-            `;
-                // Remove image on close click
+                    <img class="w-full h-full object-cover rounded-lg" src="${e.target.result}" alt="${file.name}">
+                    <button type="button" class="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span class="material-symbols-outlined !text-base">close</span>
+                    </button>
+                `;
+
                 div.querySelector('button').addEventListener('click', () => {
-                    uploadedFiles = uploadedFiles.filter(f => f !== file);
-                    div.remove();
+                    uploadedFiles.splice(index, 1);
+                    syncFileInput();
+                    renderPreviews();
                 });
 
                 previewGrid.appendChild(div);
-            }
+            };
+
             reader.readAsDataURL(file);
         });
     }
 
-    // Submit form with only the files still in the preview (browser sends full file input otherwise)
-    const form = document.querySelector('form[action="{{ route('addProducts.store') }}"]');
-    form.addEventListener('submit', function(e) {
-        if (uploadedFiles.length === 0) return; // Let normal validation handle "no images"
-        e.preventDefault();
-        const formData = new FormData();
-        formData.append('_token', form.querySelector('input[name="_token"]').value);
-        ['category', 'title', 'price', 'brand', 'stock', 'description'].forEach(name => {
-            const el = form.querySelector(`[name="${name}"]:not([disabled])`);
-            if (el) formData.append(name, el.value ?? '');
+    function handleFiles(files) {
+        Array.from(files).forEach(file => {
+            if (!file.type.startsWith('image/')) return;
+            uploadedFiles.push(file);
         });
-        uploadedFiles.forEach(file => formData.append('images[]', file));
-        const submitBtn = document.getElementById('submit-btn');
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Adding...';
-        fetch(form.action, { method: 'POST', body: formData })
-            .then(r => r.redirected ? (window.location = r.url) : r.json())
-            .then(() => { submitBtn.disabled = false; submitBtn.textContent = 'Add Product'; })
-            .catch(() => { submitBtn.disabled = false; submitBtn.textContent = 'Add Product'; });
+
+        syncFileInput();
+        renderPreviews();
+    }
+
+    uploadArea.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', (e) => {
+        handleFiles(e.target.files);
+    });
+
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        handleFiles(e.dataTransfer.files);
     });
 </script>
 </body>
