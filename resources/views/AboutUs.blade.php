@@ -65,7 +65,11 @@
                     </div>
                     <!-- BodyText -->
                     <p class="text-gray-700 dark:text-gray-300 text-base font-normal leading-relaxed pb-3 pt-1 px-4">
-                        Born from a passion for security and innovation, Key Lanka was founded to revolutionize how we access our world. We started with a simple idea: to create keys that are not just functional, but also beautifully designed and technologically advanced. From classic physical keys crafted with precision to cutting-edge digital access solutions, our commitment is to provide unmatched quality, reliability, and peace of mind to every customer.
+                        At Key Lanka, we specialize in providing professional car key services and household key solutions, combining advanced technology with expert craftsmanship. Whether you need a replacement car key, smart key programming, or everyday key duplication, we deliver reliable and efficient service tailored to your needs.<br><br>
+
+                        Our mission is simple — to offer the best service and total key solutions under one roof. We focus on quality, accuracy, and customer satisfaction, ensuring every product and service meets the highest standards.<br><br>
+
+                        With the growth of digital convenience, Key Lanka also brings you an easy and secure online platform where you can purchase keys and key-related products anytime, from anywhere. From key shells and remotes to accessories and tools, we make it simple for both individuals and professionals to find what they need.
                     </p>
                     <!-- SectionHeader -->
                     <h2 class="text-gray-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-10">Our Headquarters</h2>
@@ -83,7 +87,7 @@
                                 </div>
                                 <div>
                                     <h4 class="font-bold text-gray-900 dark:text-white">Phone</h4>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">+94 11 234 5678</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">0112 812789</p>
                                 </div>
                             </div>
                             <div class="flex items-start gap-4 p-4 bg-white dark:bg-background-dark rounded-lg border border-gray-200 dark:border-gray-700/50">
@@ -92,16 +96,16 @@
                                 </div>
                                 <div>
                                     <h4 class="font-bold text-gray-900 dark:text-white">Email</h4>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">hello@keylanka.com</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">info@keylanka.lk</p>
                                 </div>
                             </div>
                             <div class="flex items-start gap-4 p-4 bg-white dark:bg-background-dark rounded-lg border border-gray-200 dark:border-gray-700/50">
                                 <div class="flex-shrink-0">
-                                    <span class="material-symbols-outlined text-primary text-2xl">location_on</span>
+                                    <span class="material-symbols-outlined text-primary text-2xl">Phone</span>
                                 </div>
                                 <div>
-                                    <h4 class="font-bold text-gray-900 dark:text-white">Address</h4>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">123 Galle Road, Colombo 03, Sri Lanka</p>
+                                    <h4 class="font-bold text-gray-900 dark:text-white">Phone</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">0777 777678</p>
                                 </div>
                             </div>
                         </div>
