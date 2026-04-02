@@ -72,7 +72,7 @@ class ProductsController extends Controller
             $product->save();
 
             if ($request->hasFile('images')) {
-                $productsPath = public_path('products');
+                $productsPath = base_path('../public_html/products');
 
                 if (!File::exists($productsPath)) {
                     File::makeDirectory($productsPath, 0755, true, true);
@@ -156,7 +156,7 @@ class ProductsController extends Controller
             }
 
             if ($request->hasFile('images')) {
-                $productsPath = public_path('products');
+                $productsPath = base_path('../public_html/products');
 
                 if (!File::exists($productsPath)) {
                     File::makeDirectory($productsPath, 0755, true, true);
