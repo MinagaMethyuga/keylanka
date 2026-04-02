@@ -145,7 +145,7 @@ class ProductsController extends Controller
                 $imagesToDelete = $product->images()->whereIn('id', $deleteIds)->get();
 
                 foreach ($imagesToDelete as $img) {
-                    $fullPath = public_path($img->path);
+                    $fullPath = base_path('../public_html/' . $img->path);
 
                     if (File::exists($fullPath)) {
                         File::delete($fullPath);
@@ -189,13 +189,24 @@ class ProductsController extends Controller
 
             $product->load('images');
 
-            if ($product->images->count() === 0 && !empty($product->image)) {
-                $product->images()->create([
-                    'path' => $product->image,
-                    'is_primary' => true,
-                ]);
+            $product->load('images');
 
-                $product->load('images');
+            if ($product->images->count() === 0) {
+                $product->image = null;
+            } else {
+                $primary = $product->images->firstWhere('is_primary', true);
+
+                if ($primary) {
+                    $product->image = $primary->path;
+                } else {
+                    $firstImage = $product->images->first();
+
+                    if ($firstImage) {
+                        ProductImage::where('product_id', $product->id)->update(['is_primary' => false]);
+                        $firstImage->update(['is_primary' => true]);
+                        $product->image = $firstImage->path;
+                    }
+                }
             }
 
             $primary = $product->images->firstWhere('is_primary', true);
