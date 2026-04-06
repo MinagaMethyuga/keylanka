@@ -31,7 +31,7 @@ class SmartKey extends Controller
 
             $brandname = "Smart Keys (Others)";
         } else {
-            $query = Product::with('images')->where('category', 'smart-keys') // Adjust category name
+            $query = Product::with('images')->where('category', 'smart') // Adjust category name
             ->where('brand', $displayBrand);
 
             $brandname = "Smart Keys ({$displayBrand})";

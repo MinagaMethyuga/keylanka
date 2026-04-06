@@ -121,121 +121,92 @@ class ProductsController extends Controller
             $product = Product::with('images')->findOrFail($id);
 
             $validated = $request->validate([
-                'title' => 'required|string',
-                'price' => 'required|numeric',
-                'description' => 'required|string',
-                'brand' => 'nullable|string',
-                'stock' => 'required|numeric|min:0',
-                'category' => 'nullable|string',
-                'images' => 'nullable|array',
-                'images.*' => 'image|max:2048',
-                'delete_image_ids' => 'nullable|array',
+                'title'              => 'required|string',
+                'price'              => 'required|numeric',
+                'description'        => 'required|string',
+                'brand'              => 'nullable|string',
+                'stock'              => 'required|numeric|min:0',
+                'category'           => 'nullable|string',
+                'images'             => 'nullable|array',
+                'images.*'           => 'image|max:2048',
+                'delete_image_ids'   => 'nullable|array',
                 'delete_image_ids.*' => 'integer|exists:product_images,id',
             ]);
 
-            $product->title = $validated['title'];
-            $product->price = $validated['price'];
-            $product->brand = $validated['brand'] ?? null;
-            $product->stock = $validated['stock'];
+            $product->title       = $validated['title'];
+            $product->price       = $validated['price'];
+            $product->brand       = $validated['brand'] ?? null;
+            $product->stock       = $validated['stock'];
             $product->description = $validated['description'];
-            $product->category = $validated['category'] ?? null;
+            $product->category    = $validated['category'] ?? null;
 
+            // 1. Delete requested images
             $deleteIds = $request->input('delete_image_ids', []);
             if (!empty($deleteIds)) {
                 $imagesToDelete = $product->images()->whereIn('id', $deleteIds)->get();
-
                 foreach ($imagesToDelete as $img) {
                     $fullPath = base_path('../public_html/' . $img->path);
-
                     if (File::exists($fullPath)) {
                         File::delete($fullPath);
                     }
-
                     $img->delete();
                 }
             }
 
+            // 2. Upload new images
             if ($request->hasFile('images')) {
                 $productsPath = base_path('../public_html/products');
-
                 if (!File::exists($productsPath)) {
                     File::makeDirectory($productsPath, 0755, true, true);
                 }
 
-                $hasAnyImagesAlready = $product->images()->count() > 0;
+                // Re-check remaining images after deletions
+                $hasExistingImages = $product->images()->count() > 0;
 
                 foreach ($request->file('images') as $index => $file) {
-                    if (!$file->isValid()) {
-                        continue;
-                    }
+                    if (!$file->isValid()) continue;
 
                     $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
                     $file->move($productsPath, $filename);
-
                     $path = 'products/' . $filename;
 
-                    $isPrimary = !$hasAnyImagesAlready && $index === 0;
+                    // Only mark as primary if no images exist yet and this is the first upload
+                    $isPrimary = !$hasExistingImages && $index === 0;
 
                     $product->images()->create([
-                        'path' => $path,
+                        'path'       => $path,
                         'is_primary' => $isPrimary,
                     ]);
-
-                    if ($isPrimary) {
-                        $product->image = $path;
-                    }
                 }
             }
 
+            // 3. Resolve the correct primary image (single source of truth)
             $product->load('images');
 
-            $product->load('images');
-
-            if ($product->images->count() === 0) {
+            if ($product->images->isEmpty()) {
                 $product->image = null;
             } else {
                 $primary = $product->images->firstWhere('is_primary', true);
 
-                if ($primary) {
-                    $product->image = $primary->path;
-                } else {
-                    $firstImage = $product->images->first();
-
-                    if ($firstImage) {
-                        ProductImage::where('product_id', $product->id)->update(['is_primary' => false]);
-                        $firstImage->update(['is_primary' => true]);
-                        $product->image = $firstImage->path;
-                    }
+                if (!$primary) {
+                    // No primary set — promote the first remaining image
+                    $first = $product->images->first();
+                    $product->images()->update(['is_primary' => false]);
+                    $first->update(['is_primary' => true]);
+                    $primary = $first;
                 }
-            }
 
-            $primary = $product->images->firstWhere('is_primary', true);
-
-            if ($primary) {
                 $product->image = $primary->path;
-            } else {
-                $firstImage = $product->images->first();
-
-                if ($firstImage) {
-                    ProductImage::where('product_id', $product->id)->update(['is_primary' => false]);
-                    $firstImage->update(['is_primary' => true]);
-                    $product->image = $firstImage->path;
-                } else {
-                    $product->image = null;
-                }
             }
 
             $product->save();
 
             return redirect()->back()->with('success', 'Product updated successfully!');
+
         } catch (ValidationException $e) {
-            return redirect()->back()
-                ->withErrors($e->errors())
-                ->withInput();
+            return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Failed to update product: ' . $e->getMessage())
-                ->withInput();
+            return redirect()->back()->with('error', 'Failed to update product: ' . $e->getMessage())->withInput();
         }
     }
 
